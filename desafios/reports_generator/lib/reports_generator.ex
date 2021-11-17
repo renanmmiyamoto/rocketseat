@@ -35,6 +35,12 @@ defmodule ReportsGenerator do
     |> Enum.reduce(report_acc(), &sum_values(&1, &2))
   end
 
+  def build_from_many(filenames) when is_list(filenames) do
+    filenames
+    |> Task.async_stream(&build/1)
+    |> Enum.reduce(report_acc(), fn {:ok, result}, report -> sum_reports(report, result) end)
+  end
+
   defp sum_values([name, hours_worked, _day, month, year], %{
          "all_hours" => all_hours,
          "hours_per_month" => hours_per_month,
@@ -69,6 +75,35 @@ defmodule ReportsGenerator do
       "hours_per_month" => hours_per_month,
       "hours_per_year" => hours_per_year
     }
+  end
+
+  defp sum_reports(
+         %{
+           "all_hours" => all_hours1,
+           "hours_per_month" => hours_per_month1,
+           "hours_per_year" => hours_per_year1
+         },
+         %{
+           "all_hours" => all_hours2,
+           "hours_per_month" => hours_per_month2,
+           "hours_per_year" => hours_per_year2
+         }
+       ) do
+    all_hours = Map.merge(all_hours1, all_hours2, fn _key, val1, val2 -> val1 + val2 end)
+    hours_per_month = merge_maps(hours_per_month1, hours_per_month2)
+    hours_per_year = merge_maps(hours_per_year1, hours_per_year2)
+
+    %{
+      "all_hours" => all_hours,
+      "hours_per_month" => hours_per_month,
+      "hours_per_year" => hours_per_year
+    }
+  end
+
+  defp merge_maps(map1, map2) do
+    Map.merge(map1, map2, fn _key, val1, val2 ->
+      Map.merge(val1, val2, fn _key, teste1, teste2 -> teste1 + teste2 end)
+    end)
   end
 
   defp translate_month(month_number) when is_integer(month_number) do
