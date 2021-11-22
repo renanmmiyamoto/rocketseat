@@ -21,9 +21,9 @@ defmodule ReservaVoos.Factory do
 
     %Booking{
       id: uuid,
-      complete_date: "2021-11-22 14:00:25",
-      local_origin: "São Paulo, SP",
-      local_destination: "Curitiba, PR",
+      complete_date: ~N[2021-11-22 16:30:40],
+      local_origin: "São Paulo",
+      local_destination: "Curitiba",
       user_id: user.id
     }
   end

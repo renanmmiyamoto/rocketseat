@@ -3,18 +3,22 @@ defmodule ReservaVoos.Bookings.Report do
   alias ReservaVoos.Bookings.Booking
 
   def generate_report(start_date, end_date) do
-    build_booking_list(start_date, end_date)
-    |> handle_booking_list()
-  end
-
-  defp handle_booking_list({:ok, booking_list}) do
-    case File.write("report.csv", booking_list) do
-      :ok -> {:ok, "Report generated successfully"}
-      _nil -> {:error, "Error on generate report"}
+    with {:ok, start_date_format} <- NaiveDateTime.from_iso8601(start_date),
+         {:ok, end_date_format} <- NaiveDateTime.from_iso8601(end_date) do
+      build_booking_list(start_date_format, end_date_format)
+      |> handle_booking_report()
+    else
+      {:error, _reason} = error -> error
     end
   end
 
-  defp handle_booking_list({:error, _reason}), do: {:error, "Error on generate report"}
+  defp handle_booking_report({:ok, booking_list}) do
+    case File.write("report.csv", booking_list) do
+      :ok -> {:ok, "Report generated successfully"}
+    end
+  end
+
+  defp handle_booking_report({:error, reason}), do: {:error, reason}
 
   defp build_booking_list(start_date, end_date) do
     list =
