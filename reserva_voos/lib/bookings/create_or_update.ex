@@ -17,6 +17,11 @@ defmodule ReservaVoos.Bookings.CreateOrUpdate do
     |> save_booking()
   end
 
-  defp save_booking({:ok, %Booking{} = booking}), do: BookingAgent.save(booking)
+  defp save_booking({:ok, %Booking{} = booking}) do
+    BookingAgent.save(booking)
+
+    {:ok, "Booking created or updated successfully"}
+  end
+
   defp save_booking({:error, _reason} = error), do: error
 end

@@ -22,9 +22,8 @@ defmodule ReservaVoos.Bookings.Booking do
          user_id: user_id
        }}
     else
-      {:error, _reason} = result -> result
+      {:error, "User not found"} = error -> error
+      _nil -> {:error, "Invalid parameters"}
     end
   end
-
-  # check_user_id?
 end
